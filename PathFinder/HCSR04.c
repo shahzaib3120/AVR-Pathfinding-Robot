@@ -12,8 +12,8 @@ int main(void)
 	DDRA = 0xFF;
 	DDRD = 0b11111011;
 	_delay_ms(50);
-	GICR|=(1<<INT0);
-	MCUCR|=(1<<ISC00);
+	GICR|=(1<<INT0);	// Enabling external interrupt
+	MCUCR|=(1<<ISC00); 	// Any logical change on INT0 generates an interrupt request.
 	TCCR1A = 0;
 	int16_t COUNTA = 0;
 	sei();
