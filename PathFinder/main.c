@@ -12,33 +12,37 @@
 #define LF	PORTB4	// IN4 = LF
 
 #define led PORTA0
+#define led2 PORTA3
 
 // encoder pins
-#define leftEncoder PORTB2
-#define  rightEncoder PORTD3
-#define leftLed PORTA6
-#define rightLed PORTA4
+#define leftEncoder		PORTD2	// int0
+#define rightEncoder	PORTD3	// int1
+
+#define leftLed			PORTA6
+#define rightLed		PORTA4
 
 
 // sonar pins
 #define trigger PORTD0
-#define echo	PORTD2
+#define echo	PORTB2
 
-static volatile int pulse = 0;
 uint16_t distance = 0;
-char i = 0;
+static volatile int i = 0;
 int threshold = 10;
 
-double rightDutyCycle = 74;
-double leftDutyCycle = 75;
+double rightDutyCycle = 80;
+double leftDutyCycle = 79;
+
+
+int leftCount = 0;
+int rightCount = 0;
 
 void moveForward() {
-	for(char x=0; x<100; x++){
-		//if(distance > 20){
-			PORTB |= (1<<RF);
-			PORTB |= (1<<LF);
-		//}
-	}
+	PORTB |= (1<<RF);
+	PORTB |= (1<<LF);
+	_delay_ms(10);
+	PORTB &= ~(1<<RF);
+	PORTB &= ~(1<<LF);
 }
 
 void triggerSonar(){
@@ -50,8 +54,12 @@ void triggerSonar(){
 int main(void) {
 	//DDRA |= (1<<led) | (1<<PORTA1) | (1<<LR);
 	DDRA = 0xFF;
+	DDRA &= ~(1<<LR);
+	
+	
 	DDRB |= (1<<RF) | (1<<RR) | (1<<LF);
 	DDRB &= ~(1<<leftEncoder);
+	
 	DDRD |= (1<<trigger);
 	DDRD &= ~(1<<echo);
 	DDRD &= ~(1<<rightEncoder);
@@ -67,9 +75,9 @@ int main(void) {
 	OCR2 = (leftDutyCycle/100)*255;
 	
 	// setup for Sonar
-	GICR|=(1<<INT0);	// enable external interrupt
-	MCUCR|=(1<<ISC00) | (1<<ISC01);	// Any logical change on INT0 generates an interrupt request (rising)
-	TCCR1A = 0;			// normal mode
+	GICR|=(1<<INT0);	// Enabling external interrupt
+	MCUCR|=(1<<ISC00); 	// Any logical change on INT0 generates an interrupt request.
+	TCCR1A = 0;			// Normal mode
 	
 	// setup for speed encoders
 	GICR |= (1<<INT1);
@@ -80,58 +88,65 @@ int main(void) {
 	
 	sei();
 	
-	// timer starts for PWM
-	TCCR0 |= (1<<CS00);
-	TCCR2 |= (1<<CS20);
+	 //timer starts for PWM
+	 TCCR0 |= (1<<CS00);
+	 TCCR2 |= (1<<CS20);
 	
 	// set trigger signal once
+	PORTA |= (1<led);
+	PORTA |= (1<led2);
 	triggerSonar();
+	int thresh = 80;
 	while (1) {
-		/*PORTA |= (1<<PORTA1);
-		_delay_ms(100);
-		PORTA &= ~(1<<PORTA1);
-		_delay_ms(100);*/
-		moveForward();
+		if(leftCount <= thresh){
+			PORTA |= (1<led);
+			PORTB |= (1<<LF);
+		}else{
+			PORTA &= ~(1<led);
+			PORTB &= ~(1<<LF);
+		}
+			
+		if(rightCount <= thresh){
+			PORTA |= (1<led2);
+			PORTB |= (1<<RF);
+		}else{
+			PORTA &= ~(1<led2);
+			PORTB &= ~(1<<RF);
+		}
 	}
 }
 
 ISR(INT0_vect) {
-		
-		// left wheel
-		PORTA |= (1<<leftLed);
-		_delay_ms(10);
-		PORTA &= ~(1<<leftLed);
-		
-		
+	// left wheel
+	PORTA ^= (1<<leftLed);
+	leftCount++;
 }
 
 ISR(TIMER0_OVF_vect){
-	OCR0 = (rightDutyCycle/100)*255;
-	//rightDutyCycle = rightDutyCycle==250?0:rightDutyCycle;
-	//OCR0 = rightDutyCycle++;
+	// right
+	//OCR0 = (rightDutyCycle/100)*255;
 }
 
 ISR(TIMER2_OVF_vect){
-	OCR2 = (leftDutyCycle/100)*255;
+	//OCR2 = (leftDutyCycle/100)*255;
 	//leftDutyCycle = leftDutyCycle==250?0:leftDutyCycle;
 	//OCR2 = leftDutyCycle++;
 }
 
-	
 ISR(INT1_vect){
 	// right wheel
-	PORTA |= (1<<rightLed);
-	_delay_ms(10);
-	PORTA &= ~(1<<rightLed);
+	PORTA ^= (1<<rightLed);
+	rightCount++;
 }
 
 ISR(INT2_vect){
 
+	
 	if (i==1) {
 		TCCR1B = 0;		// stops the timer when echo is registered again
 		distance = TCNT1/58;
 		TCNT1=0;		// resets timer
-		if(distance < 20){
+		if(distance < 10){
 			PORTA |= (1<<led);
 		}
 		i=0;			// resets echo teller state
