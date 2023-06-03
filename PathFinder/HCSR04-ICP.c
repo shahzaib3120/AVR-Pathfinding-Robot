@@ -7,7 +7,7 @@
 
 // sonar pins
 #define trigger PORTD0
-#define echo	PORTD2
+#define echo	PORTD6
 
 uint16_t risingTime = 0;
 uint16_t fallingTime = 0;

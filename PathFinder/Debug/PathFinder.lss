@@ -191,7 +191,7 @@ int main(void) {
  18c:	81 bb       	out	0x11, r24	; 17
 	DDRD &= ~(1<<echo);
  18e:	81 b3       	in	r24, 0x11	; 17
- 190:	8b 7f       	andi	r24, 0xFB	; 251
+ 190:	8f 7b       	andi	r24, 0xBF	; 191
  192:	81 bb       	out	0x11, r24	; 17
 
 	TCCR1A = 0;	
