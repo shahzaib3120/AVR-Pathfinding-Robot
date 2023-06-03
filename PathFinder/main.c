@@ -58,16 +58,16 @@ int main(void) {
 	
 	
 	DDRB |= (1<<RF) | (1<<RR) | (1<<LF);
-	DDRB &= ~(1<<leftEncoder);
+	DDRB &= ~(1<<echo);
 	
 	DDRD |= (1<<trigger);
-	DDRD &= ~(1<<echo);
+	DDRD &= ~(1<<leftEncoder);
 	DDRD &= ~(1<<rightEncoder);
-	PORTA=0x00;
 	
 	// PWM Setup
 	DDRB |= (1<<rightPWM);
 	DDRD |= (1<<leftPWM);
+	
 	TCCR0 = (1<<COM01) | (1<<WGM00) | (1<<WGM01); // set non-inverting Fast PWM mode on timer0
 	TCCR2 = (1<<COM21) | (1<<WGM20) | (1<<WGM21); // set non-inverting Fast PWM mode on timer2
 	TIMSK = (1<<TOIE0) | (1<<TOIE2);
@@ -75,16 +75,13 @@ int main(void) {
 	OCR2 = (leftDutyCycle/100)*255;
 	
 	// setup for Sonar
-	GICR|=(1<<INT0);	// Enabling external interrupt
-	MCUCR|=(1<<ISC00); 	// Any logical change on INT0 generates an interrupt request.
+	MCUCSR |=(1<<ISC2);	// Detect on rising edge for INT2
+	GICR|=(1<<INT2);	// Enable INT2
 	TCCR1A = 0;			// Normal mode
 	
 	// setup for speed encoders
-	GICR |= (1<<INT1);
-	MCUCR|= (1<<ISC11) | (ISC10);
-	MCUCSR |= (1<<ISC2);
-	GICR |= (1<<INT2);
-	
+	GICR |= (1<<INT1) | (1<<INT0); // enable INT0 and INT1
+	MCUCR|= (1<<ISC11) | (ISC10) | (1<<ISC01) | (1<<ISC00); // detect changes on rising edge for INT1 and INT0
 	
 	sei();
 	
@@ -93,24 +90,22 @@ int main(void) {
 	 TCCR2 |= (1<<CS20);
 	
 	// set trigger signal once
-	PORTA |= (1<led);
-	PORTA |= (1<led2);
 	triggerSonar();
 	int thresh = 80;
 	while (1) {
 		if(leftCount <= thresh){
-			PORTA |= (1<led);
+			//PORTA |= (1<led);
 			PORTB |= (1<<LF);
 		}else{
-			PORTA &= ~(1<led);
+			//PORTA &= ~(1<led);
 			PORTB &= ~(1<<LF);
 		}
 			
 		if(rightCount <= thresh){
-			PORTA |= (1<led2);
+			//PORTA |= (1<led2);
 			PORTB |= (1<<RF);
 		}else{
-			PORTA &= ~(1<led2);
+			//PORTA &= ~(1<led2);
 			PORTB &= ~(1<<RF);
 		}
 	}
@@ -124,13 +119,10 @@ ISR(INT0_vect) {
 
 ISR(TIMER0_OVF_vect){
 	// right
-	//OCR0 = (rightDutyCycle/100)*255;
 }
 
 ISR(TIMER2_OVF_vect){
-	//OCR2 = (leftDutyCycle/100)*255;
-	//leftDutyCycle = leftDutyCycle==250?0:leftDutyCycle;
-	//OCR2 = leftDutyCycle++;
+	//left
 }
 
 ISR(INT1_vect){
@@ -140,19 +132,17 @@ ISR(INT1_vect){
 }
 
 ISR(INT2_vect){
-
-	
 	if (i==1) {
 		TCCR1B = 0;		// stops the timer when echo is registered again
 		distance = TCNT1/58;
 		TCNT1=0;		// resets timer
 		if(distance < 10){
-			PORTA |= (1<<led);
+			PORTA |= (1<<led2);
 		}
 		i=0;			// resets echo teller state
 		// set the trigger signal again
 		triggerSonar();
-		PORTA &= ~(1<<led);
+		PORTA &= ~(1<<led2);
 	}
 	if (i==0) {
 		TCCR1B|=(1<<CS10);	// starts timer 0 with no prescalar when echo is registered for the first time

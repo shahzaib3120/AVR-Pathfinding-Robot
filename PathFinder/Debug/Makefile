@@ -37,7 +37,7 @@ SUBDIRS :=
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
-../main.c
+../HCSR04-ICP.c
 
 
 PREPROCESSING_SRCS += 
@@ -47,16 +47,16 @@ ASM_SRCS +=
 
 
 OBJS +=  \
-main.o
+HCSR04-ICP.o
 
 OBJS_AS_ARGS +=  \
-main.o
+HCSR04-ICP.o
 
 C_DEPS +=  \
-main.d
+HCSR04-ICP.d
 
 C_DEPS_AS_ARGS +=  \
-main.d
+HCSR04-ICP.d
 
 OUTPUT_FILE_PATH +=PathFinder.elf
 
@@ -72,7 +72,7 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
-./main.o: .././main.c
+./HCSR04-ICP.o: .././HCSR04-ICP.c
 	@echo Building file: $<
 	@echo Invoking: XC8 C Compiler : 2.36
 	$(QUOTE)C:\Program Files\Microchip\xc8\v2.36\bin\xc8-cc.exe$(QUOTE)  -mcpu=ATmega16A  -mdfp="D:\Atmel\7.0\Packs\atmel\ATmega_DFP\1.7.374\xc8"  -c -x c -funsigned-char -funsigned-bitfields -mext=cci -D__ATmega16A__ -DDEBUG  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

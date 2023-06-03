@@ -25,7 +25,7 @@ int main(void)
 		COUNTA = pulse/58;
 		if(COUNTA < 10){
 			PORTA |= (1<<0);
-		}else{
+			}else{
 			PORTA &= ~(1<<0);
 		}
 	}

@@ -104,7 +104,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="main.c">
+    <Compile Include="HCSR04-ICP.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
