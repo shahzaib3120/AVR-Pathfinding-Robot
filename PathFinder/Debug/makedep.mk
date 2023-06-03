@@ -2,5 +2,5 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-HCSR04-ICP.c
+main.c
 

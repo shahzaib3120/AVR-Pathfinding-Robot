@@ -24,10 +24,11 @@
 
 // sonar pins
 #define trigger PORTD0
-#define echo	PORTB2
+#define echo	PORTD6
 
+uint16_t fallingTime = 0;
 uint16_t distance = 0;
-static volatile int i = 0;
+volatile unsigned char rising = 1;
 int threshold = 10;
 
 double rightDutyCycle = 80;
@@ -58,8 +59,8 @@ int main(void) {
 	
 	
 	DDRB |= (1<<RF) | (1<<RR) | (1<<LF);
-	DDRB &= ~(1<<echo);
 	
+	DDRD &= ~(1<<echo);
 	DDRD |= (1<<trigger);
 	DDRD &= ~(1<<leftEncoder);
 	DDRD &= ~(1<<rightEncoder);
@@ -75,9 +76,9 @@ int main(void) {
 	OCR2 = (leftDutyCycle/100)*255;
 	
 	// setup for Sonar
-	MCUCSR |=(1<<ISC2);	// Detect on rising edge for INT2
-	GICR|=(1<<INT2);	// Enable INT2
-	TCCR1A = 0;			// Normal mode
+	TCCR1A = 0;
+	TCCR1B |= (1<<ICES1); // detect rising edge
+	TIMSK |= (1<<TICIE1);
 	
 	// setup for speed encoders
 	GICR |= (1<<INT1) | (1<<INT0); // enable INT0 and INT1
@@ -131,21 +132,23 @@ ISR(INT1_vect){
 	rightCount++;
 }
 
-ISR(INT2_vect){
-	if (i==1) {
-		TCCR1B = 0;		// stops the timer when echo is registered again
-		distance = TCNT1/58;
-		TCNT1=0;		// resets timer
-		if(distance < 10){
-			PORTA |= (1<<led2);
-		}
-		i=0;			// resets echo teller state
-		// set the trigger signal again
+ISR(TIMER1_CAPT_vect) {
+	if(rising){
+		TCCR1B &= ~(1<<ICES1);	// detect falling edge next time
+		TCCR1B |= (1<<CS10);	// start timer
+		rising =0;
+	}else{
+		fallingTime = ICR1;
+		TCCR1B |= (1<<ICES1);	// detect rising edge next time
+		rising = 1;
+		TCCR1B &= ~(1<<CS10);	// stop the timer
+		TCNT1 = 0;
+		distance = (fallingTime)/58;
 		triggerSonar();
-		PORTA &= ~(1<<led2);
-	}
-	if (i==0) {
-		TCCR1B|=(1<<CS10);	// starts timer 0 with no prescalar when echo is registered for the first time
-		i=1;				// tells echo has been registered
+		if(distance < 20){
+			PORTA |= (1<<led);
+		}else{
+			PORTA &= ~(1<<led);
+		}
 	}
 }

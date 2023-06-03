@@ -9,7 +9,6 @@
 #define trigger PORTD0
 #define echo	PORTD6
 
-uint16_t risingTime = 0;
 uint16_t fallingTime = 0;
 uint16_t distance = 0;
 volatile unsigned char rising = 1;
