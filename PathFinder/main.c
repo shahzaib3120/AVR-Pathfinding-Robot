@@ -1,3 +1,4 @@
+//#define F_CPU 8000000
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -27,23 +28,63 @@
 #define echo	PORTD6
 
 uint16_t fallingTime = 0;
-uint16_t distance = 0;
+uint16_t distance = 999;
 volatile unsigned char rising = 1;
-int threshold = 10;
+int threshold = 20;
+volatile unsigned char obstacle = 0;
 
-double rightDutyCycle = 80;
-double leftDutyCycle = 79;
+
+double rightDutyCycle = 70;
+double leftDutyCycle = 69;
 
 
 int leftCount = 0;
 int rightCount = 0;
 
+
 void moveForward() {
-	PORTB |= (1<<RF);
-	PORTB |= (1<<LF);
-	_delay_ms(10);
+	leftCount = 0;
+	rightCount = 0;
+	while(leftCount <=40 && rightCount<=40 ){
+		if(!obstacle){
+			PORTB |= (1<<RF);
+			PORTB |= (1<<LF);
+			_delay_ms(100);
+		}
+		PORTB &= ~(1<<RF);
+		PORTB &= ~(1<<LF);
+	}
+	_delay_ms(500);
+}
+
+void turnLeft(){
+	leftCount = 0;
+	rightCount = 0;
+	_delay_ms(100);
+	while(leftCount <=10 && rightCount<=10 ){
+		PORTB |= (1<<RF);
+		PORTA |= (1<<LR);
+	}
 	PORTB &= ~(1<<RF);
+	PORTA &= ~(1<<LR);
+	leftCount = 0;
+	rightCount = 0;
+	_delay_ms(500);
+}
+
+void turnRight(){
+	leftCount = 0;
+	rightCount = 0;
+	_delay_ms(100);
+	while(leftCount <=10 && rightCount<=10 ){
+		PORTB |= (1<<LF);
+		PORTB |= (1<<RR);
+	}
 	PORTB &= ~(1<<LF);
+	PORTB &= ~(1<<RR);
+	leftCount = 0;
+	rightCount = 0;
+	_delay_ms(500);
 }
 
 void triggerSonar(){
@@ -52,10 +93,18 @@ void triggerSonar(){
 	PORTD &=~(1<<trigger);
 }
 
+void setRightDuty(double perc){
+	OCR0 = (perc/100)*255;
+}
+
+void setLeftDuty(double perc){
+	OCR2 = (perc/100)*255;
+}
+
 int main(void) {
 	//DDRA |= (1<<led) | (1<<PORTA1) | (1<<LR);
 	DDRA = 0xFF;
-	DDRA &= ~(1<<LR);
+	DDRA |= (1<<LR);
 	
 	
 	DDRB |= (1<<RF) | (1<<RR) | (1<<LF);
@@ -93,22 +142,20 @@ int main(void) {
 	// set trigger signal once
 	triggerSonar();
 	int thresh = 80;
+	//turnLeft();
+	_delay_ms(1000);
+	//turnLeft();
+	moveForward();
+	turnLeft();
+	moveForward();
+	turnRight();
+	moveForward();
 	while (1) {
-		if(leftCount <= thresh){
-			//PORTA |= (1<led);
-			PORTB |= (1<<LF);
-		}else{
-			//PORTA &= ~(1<led);
-			PORTB &= ~(1<<LF);
-		}
-			
-		if(rightCount <= thresh){
-			//PORTA |= (1<led2);
-			PORTB |= (1<<RF);
-		}else{
-			//PORTA &= ~(1<led2);
-			PORTB &= ~(1<<RF);
-		}
+		//moveForward();
+		//turnLeft();
+		//moveForward();
+		//turnRight();
+		//moveForward();
 	}
 }
 
@@ -145,10 +192,12 @@ ISR(TIMER1_CAPT_vect) {
 		TCNT1 = 0;
 		distance = (fallingTime)/58;
 		triggerSonar();
-		if(distance < 20){
-			PORTA |= (1<<led);
+		if(distance < threshold){
+			obstacle = 1;
+			//PORTA |= (1<<led);
 		}else{
-			PORTA &= ~(1<<led);
+			obstacle = 0;
+			//PORTA &= ~(1<<led);
 		}
 	}
 }
