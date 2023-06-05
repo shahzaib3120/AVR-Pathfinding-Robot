@@ -15,7 +15,7 @@
 #define LF	PORTB4	// IN4 = LF
 
 #define led2 PORTA1
-int turns = 9;
+int turns = 8;
 int timeTurn = 20800;
 double straight = 40*(22.0/30.0);
 
@@ -74,7 +74,7 @@ void Right_Turn(){
 	leftCount = 0;
 	rightCount = 0;
 	_delay_ms(100);
-	while(!(leftCount > turns && rightCount>turns)){
+	while(!(leftCount > turns+1 && rightCount>turns)){
 		PORTB |= (1<<LF);
 		PORTB |= (1<<RR);
 	}
