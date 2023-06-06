@@ -92,11 +92,11 @@ If you wish to use a smaller grid, you can add imaginary obstacles in the bounda
 For Example:
 
 ```c
-    ...
-    else if (PF.Map[i][k].gridNom == 4 || PF.Map[i][k].gridNom == 10) {
-                    PF.Map[i][k].index = 2; // initial wall
-    }
-    ...
+...
+else if (PF.Map[i][k].gridNom == 4 || PF.Map[i][k].gridNom == 10) {
+                PF.Map[i][k].index = 2; // initial wall
+}
+...
 ```
 
 This will add a wall at blocks 4 and 10 in the grid.
@@ -109,8 +109,8 @@ This will add a wall at blocks 4 and 10 in the grid.
 
 ```c
 // setup for speed encoders
-	GICR |= (1 << INT1) | (1 << INT0);							   // enable INT0 and INT1
-	MCUCR |= (1 << ISC11) | (ISC10) | (1 << ISC01) | (1 << ISC00); // detect changes on rising edge for INT1 and INT0
+GICR |= (1 << INT1) | (1 << INT0);							   // enable INT0 and INT1
+MCUCR |= (1 << ISC11) | (ISC10) | (1 << ISC01) | (1 << ISC00); // detect changes on rising edge for INT1 and INT0
 ```
 
 ### PWM Signals
@@ -118,20 +118,20 @@ This will add a wall at blocks 4 and 10 in the grid.
 Timer 0 and Timer 2 are used for generating PWM signals for the motors. Both timers are used without pre-scalars so max value is 255. Following is the setup for the timers:
 
 ```c
-    DDRB |= (1 << rightPWM);
-	DDRD |= (1 << leftPWM);
+DDRB |= (1 << rightPWM);
+DDRD |= (1 << leftPWM);
 
-	TCCR0 = (1 << COM01) | (1 << WGM00) | (1 << WGM01); // set non-inverting Fast PWM mode on timer0
-	TCCR2 = (1 << COM21) | (1 << WGM20) | (1 << WGM21); // set non-inverting Fast PWM mode on timer2
-	TIMSK = (1 << TOIE0) | (1 << TOIE2);
-	OCR0 = (rightDutyCycle / 100) * 255;
-	OCR2 = (leftDutyCycle / 100) * 255;
+TCCR0 = (1 << COM01) | (1 << WGM00) | (1 << WGM01); // set non-inverting Fast PWM mode on timer0
+TCCR2 = (1 << COM21) | (1 << WGM20) | (1 << WGM21); // set non-inverting Fast PWM mode on timer2
+TIMSK = (1 << TOIE0) | (1 << TOIE2);
+OCR0 = (rightDutyCycle / 100) * 255;
+OCR2 = (leftDutyCycle / 100) * 255;
 
-    ...
+...
 
-    // start timers just before while(1) loop
-    TCCR0 |= (1 << CS00);
-	TCCR2 |= (1 << CS20);
+// start timers just before while(1) loop
+TCCR0 |= (1 << CS00);
+TCCR2 |= (1 << CS20);
 
 ```
 
@@ -145,10 +145,10 @@ $$d = \frac{t}{58} \ cm$$
 Following the setup for the timer:
 
 ```c
-    // setup for Sonar
-    TCCR1A = 0;
-	TCCR1B |= (1 << ICES1); // detect rising edge
-	TIMSK |= (1 << TICIE1);
+// setup for Sonar
+TCCR1A = 0;
+TCCR1B |= (1 << ICES1); // detect rising edge
+TIMSK |= (1 << TICIE1);
 ```
 
 The Interrupt Service Routine for the timer is as follows:
