@@ -7,11 +7,15 @@
 - [Fine Tuning](#fine-tuning)
   - [Block Dimension](#block-dimension)
   - [Block movement](#block-movement)
-  - [PWM Signals](#pwm-signals)
+  - [PWM Values](#pwm-values)
   - [Turning](#turning)
 - [Know your direction](#know-your-direction)
 - [Source and Destination](#source-and-destination)
 - [Using a small grid](#using-a-small-grid)
+- [AVR Details](#avr-details)
+  - [External Interrupts](#external-interrupts)
+  - [PWM Signals](#pwm-signals)
+  - [Ultrasonic Sensor HC SR-04](#ultrasonic-sensor-hc-sr-04)
 
 ## Introduction
 
@@ -56,7 +60,7 @@ $$ticksPerCm = \frac{arbitrary\ ticks}{distance\ moved}$$
 
 Set the value of <code>ticksPerCm</code> in <code>movements.h</code> file.
 
-### PWM Signals
+### PWM Values
 
 If the robot is not moving in a straight line, the PWM signals need to be fine tuned. This is an hit and trial process. The PWM signals can be fine tuned by changing the values of <code>OCR0</code> and <code>OCR2</code>.<br>
 The values in percentage can also be set in the <code>rightDutyCycle</code> and <code>leftDutyCycle</code> variables in file. These values are set in Timer OCRs only once in the setup. If you want to change the signal on the go, you can use the following functions:
