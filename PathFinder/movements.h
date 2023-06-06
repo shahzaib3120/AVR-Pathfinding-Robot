@@ -12,11 +12,13 @@
 #define RR PORTB1 // IN2 = RR
 #define LR PORTB2 // IN3 = LR
 #define LF PORTB4 // IN4 = LF
-
+#define BLOCK_SIZE 40
 #define led2 PORTA1
+double ticksPerCm = 22.0 / 30.0;
+
 int turns = 8;
 int timeTurn = 20800;
-double straight = 40 * (22.0 / 30.0);
+double straight = BLOCK_SIZE * ticksPerCm;
 
 int leftCount = 0;
 int rightCount = 0;
