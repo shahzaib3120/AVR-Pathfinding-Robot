@@ -1,5 +1,18 @@
 # AVR Path Finder
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Methodology](#methodology)
+- [Fine Tuning](#fine-tuning)
+  - [Block Dimension](#block-dimension)
+  - [Block movement](#block-movement)
+  - [PWM Signals](#pwm-signals)
+  - [Turning](#turning)
+- [Know your direction](#know-your-direction)
+- [Source and Destination](#source-and-destination)
+- [Using a small grid](#using-a-small-grid)
+
 ## Introduction
 
 This project aims at making an autonomous navigation robot which moves from source to destination in a 6x6 grid while avoiding the obstacles in its way. It is equipped with:
