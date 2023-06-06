@@ -54,6 +54,8 @@ The robot measures distance using the optical encoders and moves across one bloc
 We measure the number of ticks required to move $1\ cm$. This can be done my setting the number of ticks to an arbitrary value and measuring the distance moved by the robot. The number of ticks required to move $1\ cm$ can be calculated using the following formula:
 $$ticksPerCm = \frac{arbitrary\ ticks}{distance\ moved}$$
 
+Set the value of <code>ticksPerCm</code> in <code>movements.h</code> file.
+
 ### PWM Signals
 
 If the robot is not moving in a straight line, the PWM signals need to be fine tuned. This is an hit and trial process. The PWM signals can be fine tuned by changing the values of <code>OCR0</code> and <code>OCR2</code>.<br>
