@@ -139,11 +139,11 @@ TCCR2 |= (1 << CS20);
 
 Timer Input Capture is used to measure the pulse width sent by the sensor on echo pin. First the timer is set to detect the rising edge of the echo pulse. In the ISR of timer, if the detection is rising edge, the timer is reset and set to detect falling edge. If the detection is falling edge, the timer value is stored in a variable. The timer is then reset and set to detect rising edge again. The timer value is then converted to distance using the following formula:
 
-$$d = \frac{v_{sound}*t}{2*f_{osc}} = \frac{340*100}{2*10^6}*t$$
+$$ d = \frac{v*{sound}*t}{2*f*{osc}} = \frac{340*100}{2*10^6}\ t $$
 
-<!-- <br>
+<br>
 
-$$d = \frac{t}{58} \ cm$$ -->
+$$d = \frac{t}{58} \ cm$$
 
 Following the setup for the timer:
 
