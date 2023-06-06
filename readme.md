@@ -141,9 +141,9 @@ Timer Input Capture is used to measure the pulse width sent by the sensor on ech
 
 $$d = \frac{v_{sound}*t}{2*f_{osc}} = \frac{340*100}{2*10^6}*t$$
 
-<br>
+<!-- <br>
 
-$$d = \frac{t}{58} \ cm$$
+$$d = \frac{t}{58} \ cm$$ -->
 
 Following the setup for the timer:
 
