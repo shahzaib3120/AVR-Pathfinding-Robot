@@ -213,9 +213,9 @@ int main(void)
 	// PORTC = 0xFF;
 
 	// A star setup
-	setSource();
+	// setSource(); // used for testing
 	buildMap();
-	setDest();
+	// setDest(); // used for testing
 	setGoal(destination);
 	long count;
 
@@ -226,13 +226,6 @@ int main(void)
 	TCCR2 |= (1 << CS20);
 
 	// set trigger signal once
-	//_delay_ms(1000);
-	// Forward();
-	// Forward();
-	// Right_Turn();
-	// Right_Turn();
-	// Left_Turn();
-	// Left_Turn();
 	triggerSonar();
 	while (1)
 	{

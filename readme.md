@@ -92,11 +92,98 @@ If you wish to use a smaller grid, you can add imaginary obstacles in the bounda
 For Example:
 
 ```c
-...
-else if (PF.Map[i][k].gridNom == 4 || PF.Map[i][k].gridNom == 10) {
-				PF.Map[i][k].index = 2; // initial wall
-}
-...
+    ...
+    else if (PF.Map[i][k].gridNom == 4 || PF.Map[i][k].gridNom == 10) {
+                    PF.Map[i][k].index = 2; // initial wall
+    }
+    ...
 ```
 
 This will add a wall at blocks 4 and 10 in the grid.
+
+## AVR Details
+
+### External Interrupts
+
+<code>INT0</code> and <code>INT1</code> external interrupts are used for the left and right encoders respectively. Both interrupts are synchronous in operation. The interrupts are triggered on the rising edge of the signal. Following is the setup for the interrupts:
+
+```c
+// setup for speed encoders
+	GICR |= (1 << INT1) | (1 << INT0);							   // enable INT0 and INT1
+	MCUCR |= (1 << ISC11) | (ISC10) | (1 << ISC01) | (1 << ISC00); // detect changes on rising edge for INT1 and INT0
+```
+
+### PWM Signals
+
+Timer 0 and Timer 2 are used for generating PWM signals for the motors. Both timers are used without pre-scalars so max value is 255. Following is the setup for the timers:
+
+```c
+    DDRB |= (1 << rightPWM);
+	DDRD |= (1 << leftPWM);
+
+	TCCR0 = (1 << COM01) | (1 << WGM00) | (1 << WGM01); // set non-inverting Fast PWM mode on timer0
+	TCCR2 = (1 << COM21) | (1 << WGM20) | (1 << WGM21); // set non-inverting Fast PWM mode on timer2
+	TIMSK = (1 << TOIE0) | (1 << TOIE2);
+	OCR0 = (rightDutyCycle / 100) * 255;
+	OCR2 = (leftDutyCycle / 100) * 255;
+
+    ...
+
+    // start timers just before while(1) loop
+    TCCR0 |= (1 << CS00);
+	TCCR2 |= (1 << CS20);
+
+```
+
+### Ultrasonic Sensor HC SR-04
+
+Timer Input Capture is used to measure the pulse width sent by the sensor on echo pin. First the timer is set to detect the rising edge of the echo pulse. In the ISR of timer, if the detection is rising edge, the timer is reset and set to detect falling edge. If the detection is falling edge, the timer value is stored in a variable. The timer is then reset and set to detect rising edge again. The timer value is then converted to distance using the following formula:
+
+$$d = \frac{v_{sound}*t}{2*f_{osc}} = \frac{340*100}{2*10^6}*t$$
+$$d = \frac{t}{58} \ cm$$
+
+Following the setup for the timer:
+
+```c
+    // setup for Sonar
+    TCCR1A = 0;
+	TCCR1B |= (1 << ICES1); // detect rising edge
+	TIMSK |= (1 << TICIE1);
+```
+
+The Interrupt Service Routine for the timer is as follows:
+
+```c
+volatile unsigned char rising = 1;
+volatile unsigned char obstacle = 0;
+
+...
+
+ISR(TIMER1_CAPT_vect)
+{
+	if (rising)
+	{
+		TCCR1B &= ~(1 << ICES1); // detect falling edge next time
+		TCCR1B |= (1 << CS10);	 // start timer
+		rising = 0;
+	}
+	else
+	{
+		fallingTime = ICR1;
+		TCCR1B |= (1 << ICES1); // detect rising edge next time
+		rising = 1;
+		TCCR1B &= ~(1 << CS10); // stop the timer
+		TCNT1 = 0;
+		distance = (fallingTime) / 58;
+		triggerSonar();
+		if (distance < threshold)
+		{
+			obstacle = 1;
+		}
+		else
+		{
+			obstacle = 0;
+		}
+	}
+}
+```
