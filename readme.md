@@ -210,4 +210,4 @@ ISR(TIMER1_CAPT_vect)
 
 ## Acknowledgement
 
-I extend my gratitude to [Frank](xianzhejin@163.com) for providing the base code for A\* algorithm.
+I extend my gratitude to [Frank](mailto:xianzhejin@163.com) for providing the base code for A\* algorithm.
